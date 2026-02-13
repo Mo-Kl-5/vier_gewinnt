@@ -1,198 +1,60 @@
-# Planung der Umsetzung
+Projektdokumentation: Planung & Umsetzung „Vier Gewinnt“
+1. Einleitung & Zielsetzung
+Ziel dieses Projekts war die Entwicklung einer stabilen, erweiterbaren Version des Spieleklassikers „Vier Gewinnt“ in Python. Von Anfang an lag unser Fokus nicht nur auf der reinen Funktionalität, sondern auf einem sauberen Software-Design, das den Prinzipien der Objektorientierung folgt.
 
-## Übersicht
+2. Architektur & Designentscheidungen
+Das Klassendesign (Konzept)
+Wir haben uns für eine klare Trennung der Zuständigkeiten entschieden, um den Code wartbar zu halten.
 
-Dieses Dokument beschreibt die initiale Planung des Vier Gewinnt Projekts, einschließlich der Klassenstruktur, Methoden und Interaktionen.
+Code-Snippet
+classDiagram
+    direction TB
+    class Spielbrett {
+        +list brett
+        +stein_einwerfen(spalte, symbol)
+        +pruefe_gewinn(symbol)
+    }
+    class Spieler {
+        <<abstract>>
+        +str name
+        +naechster_zug(brett)*
+    }
+    class Spiel {
+        +Spielbrett brett
+        +spielen()
+    }
+    Spieler <|-- MenschlicherSpieler
+    Spieler <|-- ComputerSpieler
+    Spiel "1" *-- "1" Spielbrett
+    Spiel "1" *-- "2" Spieler
+Warum dieses Muster?
+Strategy Pattern für die Spieler: Das war eine bewusste Entscheidung. Durch die Abstraktion der Klasse Spieler ist es unserem System egal, ob ein Mensch vor dem Bildschirm sitzt oder ein Algorithmus die Züge berechnet. Das macht das System extrem flexibel für spätere Upgrades (z. B. eine „schlaue“ KI).
 
-## Klassendiagramm (Konzept)
+Kapselung der Logik: Das Spielbrett weiß nichts über die Spieler. Es validiert lediglich Züge und erkennt Gewinnmuster. Die Spiel-Klasse fungiert als „Regisseur“, der alles zusammenhält.
 
-```
-┌─────────────────────┐
-│    Spielbrett       │
-├─────────────────────┤
-│ - reihen: int       │
-│ - spalten: int      │
-│ - brett: list[][]   │
-├─────────────────────┤
-│ + ist_spalte_gueltig() │
-│ + stein_einwerfen()    │
-│ + pruefe_gewinn()      │
-│ + ist_voll()           │
-│ + anzeigen()           │
-│ + zuruecksetzen()      │
-└─────────────────────┘
-         △
-         │
-         │ verwendet
-         │
-┌─────────────────────┐         ┌─────────────────────┐
-│     Spiel           │────────▷│     Spieler         │
-├─────────────────────┤         ├─────────────────────┤
-│ - brett: Spielbrett │         │ - name: str         │
-│ - spieler1: Spieler │         │ - symbol: str       │
-│ - spieler2: Spieler │         └─────────────────────┘
-│ - aktueller_spieler │                   △
-├─────────────────────┤                   │
-│ + spielmodus_waehlen()│                 │
-│ + spieler_wechseln()  │    ┌────────────┴──────────┐
-│ + spielen()           │    │                       │
-│ + neues_spiel()       │    │                       │
-└─────────────────────┘    │                       │
-                      ┌────────────┐        ┌──────────────┐
-                      │ Menschlicher│        │  Computer-   │
-                      │   Spieler   │        │   Spieler    │
-                      ├────────────┤        ├──────────────┤
-                      │+ naechster_zug()│   │+ naechster_zug()│
-                      └────────────┘        └──────────────┘
-```
+3. Der Entwicklungsprozess: Theorie vs. Praxis
+Kein Projekt läuft exakt wie geplant. Hier sind die wichtigsten Anpassungen, die wir während der Programmierung vorgenommen haben:
 
-## Geplante Klassen
+Vom Flag zur Vererbung: Ursprünglich wollten wir nur eine Klasse Spieler mit einem Attribut ist_computer. Wir merkten aber schnell, dass das zu unschönen if-else-Strukturen führt. Der Wechsel auf echte Vererbung hat den Code massiv bereinigt.
 
-### 1. Klasse `Spielbrett`
+Zentralisierte Gewinnprüfung: Wir überlegten, eine eigene Klasse für die Gewinnprüfung zu bauen. Letztlich haben wir diese Logik aber direkt in das Spielbrett integriert, da die Prüfung untrennbar mit dem Zustand des 2D-Arrays verbunden ist.
 
-**Verantwortung**: Verwaltung des Spielfeldes und Spiellogik
+4. Persönliche Note: Probleme & Lösungen (Lessons Learned)
+Ein wichtiger Teil unseres Projekts war die Zusammenarbeit über Git und GitHub. Hier sind wir auf reale Herausforderungen gestoßen, die uns als Team wachsen ließen:
 
-**Attribute**:
-- `reihen`: Anzahl der Reihen (6)
-- `spalten`: Anzahl der Spalten (7)
-- `brett`: 2D-Liste für Spielfeld-Zustand
+Die „Geister-Dateien“ (Problem mit .DS_Store)
+Als Mac-Nutzer hatten wir anfangs das Problem, dass versteckte Systemdateien (.DS_Store) ständig Merge-Konflikte verursachten.
 
-**Methoden**:
-- `ist_spalte_gueltig(spalte)`: Prüft ob Zug gültig ist
-- `stein_einwerfen(spalte, spieler)`: Führt einen Zug aus
-- `pruefe_gewinn(spieler)`: Überprüft Gewinnbedingung
-- `ist_voll()`: Prüft ob Brett voll ist (Unentschieden)
-- `anzeigen()`: Gibt Brett auf Konsole aus
-- `zuruecksetzen()`: Setzt Brett zurück
+Lösung: Wir haben eine professionelle .gitignore-Datei erstellt, um diese Dateien konsequent aus dem Repository auszuschließen. Das hat den Workflow sofort beruhigt.
 
-**Begründung**: Das Spielbrett ist zentral für die Spiellogik. Eine eigene Klasse ermöglicht gute Testbarkeit und Wiederverwendbarkeit.
+Der „Force-Push“-Zwischenfall
+Während der finalen Phase gab es einen kritischen Moment: Durch einen erzwungenen Push (--force) wurden versehentlich die Unit-Tests eines Teammitglieds auf GitHub überschrieben.
 
-### 2. Klasse `Spieler` (abstrakte Basisklasse)
+Lösung & Lerneffekt: Wir haben gelernt, dass Kommunikation wichtiger ist als der Befehl im Terminal. Wir konnten die Tests durch lokale Backups wiederherstellen. Dieser Vorfall hat uns verdeutlicht, warum Git-Workflows (Branches und Pull Requests) in der professionellen Softwareentwicklung unverzichtbar sind.
 
-**Verantwortung**: Gemeinsame Schnittstelle für alle Spielertypen
+5. Fazit & Ausblick
+Das Projekt steht auf einem soliden Fundament. Dank der sauberen Trennung der Klassen könnten wir in einer nächsten Version problemlos:
 
-**Attribute**:
-- `name`: Name des Spielers
-- `symbol`: Spielersymbol ('X' oder 'O')
+Eine grafische Oberfläche (GUI) aufsetzen, ohne die Spiellogik ändern zu müssen.
 
-**Methoden**:
-- `naechster_zug(brett)`: Gibt nächsten Zug zurück (muss überschrieben werden)
-
-**Begründung**: Abstraktion ermöglicht verschiedene Spielertypen (Mensch, Computer) mit gleicher Schnittstelle.
-
-### 3. Klasse `MenschlicherSpieler` (erbt von `Spieler`)
-
-**Verantwortung**: Eingabeverarbeitung für menschliche Spieler
-
-**Methoden**:
-- `naechster_zug(brett)`: Fordert Benutzereingabe an und validiert diese
-
-**Begründung**: Trennung von Eingabelogik und Spiellogik.
-
-### 4. Klasse `ComputerSpieler` (erbt von `Spieler`)
-
-**Verantwortung**: KI-Logik für Computer-Gegner
-
-**Methoden**:
-- `naechster_zug(brett)`: Wählt zufälligen gültigen Zug
-
-**Begründung**: Einfache KI-Implementierung, später erweiterbar für intelligentere Strategien.
-
-### 5. Klasse `Spiel`
-
-**Verantwortung**: Spielablauf koordinieren
-
-**Attribute**:
-- `brett`: Das Spielbrett
-- `spieler1`, `spieler2`: Die beiden Spieler
-- `aktueller_spieler`: Wer gerade am Zug ist
-
-**Methoden**:
-- `spielmodus_waehlen()`: Benutzer wählt Spielmodus
-- `spieler_wechseln()`: Wechselt zwischen Spielern
-- `spielen()`: Hauptspielschleife
-- `neues_spiel()`: Startet neues Spiel
-
-**Begründung**: Zentrale Koordination des Spielablaufs, getrennt von der Spiellogik.
-
-## Interaktionen zwischen Klassen
-
-1. **Spiel → Spielbrett**: 
-   - `Spiel` erstellt ein `Spielbrett` Objekt
-   - Ruft Methoden wie `stein_einwerfen()`, `pruefe_gewinn()` auf
-
-2. **Spiel → Spieler**:
-   - `Spiel` verwaltet zwei `Spieler` Objekte
-   - Ruft `naechster_zug()` für aktuellen Spieler auf
-
-3. **Spieler → Spielbrett**:
-   - Spieler erhalten Brett als Parameter bei `naechster_zug()`
-   - Können Brett-Zustand abfragen (z.B. für KI-Entscheidungen)
-
-## Spielablauf (Sequenz)
-
-1. `Spiel` Objekt wird erstellt
-2. Benutzer wählt Spielmodus (`spielmodus_waehlen()`)
-3. `Spieler` Objekte werden erstellt (Mensch oder Computer)
-4. Spielschleife in `spielen()`:
-   - Brett anzeigen
-   - Aktueller Spieler macht Zug (`naechster_zug()`)
-   - Zug ausführen (`stein_einwerfen()`)
-   - Gewinn prüfen (`pruefe_gewinn()`)
-   - Falls gewonnen: Sieger ausgeben, Ende
-   - Falls unentschieden (`ist_voll()`): Ende
-   - Spieler wechseln
-5. Neues Spiel Option
-
-## Designentscheidungen
-
-### Warum Vererbung für Spieler?
-- Gemeinsame Schnittstelle ermöglicht austauschbare Spielertypen
-- Mensch vs. Computer unterscheiden sich nur in `naechster_zug()`
-- Erweiterbar für weitere KI-Varianten
-
-### Warum separate Spielbrett-Klasse?
-- Klare Trennung: Spiellogik vs. Spielablauf
-- Bessere Testbarkeit (Brett-Logik isoliert testbar)
-- Wiederverwendbar in anderen Projekten/Varianten
-
-### Warum Spiel-Klasse?
-- Koordiniert den Ablauf
-- Hält Spielzustand (aktueller Spieler, etc.)
-- Ermöglicht Erweiterungen (z.B. Spielstand speichern)
-
-## Änderungen während der Umsetzung
-
-### Ursprüngliche Planung
-- Initialplanung sah vor, dass `Spieler` eine konkrete Klasse ist mit einem `ist_computer` Flag
-- Gewinnprüfung sollte in separater Klasse `Gewinnpruefer` sein
-
-### Tatsächliche Umsetzung
-- **Änderung 1**: Vererbungshierarchie für Spieler
-  - **Grund**: Bessere Erweiterbarkeit, cleaner Code, folgt OOP-Prinzipien
-  - **Auswirkung**: Mehr Klassen, aber bessere Struktur
-
-- **Änderung 2**: Gewinnprüfung direkt in `Spielbrett`
-  - **Grund**: Gewinnprüfung ist eng mit Brett-Zustand verbunden
-  - **Auswirkung**: Weniger Klassen, einfacherer Code, ausreichend für Projektumfang
-
-- **Änderung 3**: Trennung von horizontaler, vertikaler, diagonaler Prüfung in einer Methode
-  - **Grund**: Alle Prüfungen folgen gleichem Muster, eine Methode mit 4 Prüfungen ist übersichtlich
-  - **Auswirkung**: Kompakterer Code, trotzdem gut lesbar
-
-## Testbarkeit
-
-Die gewählte Struktur ermöglicht gutes Testen:
-- `Spielbrett` Logik ist vollständig isoliert testbar
-- Keine UI-Abhängigkeiten in Kernlogik
-- `naechster_zug()` kann mit Mock-Objekten getestet werden
-- Gewinnbedingungen haben klare Ein-/Ausgaben
-
-## Erweiterungsmöglichkeiten
-
-Die Architektur erlaubt folgende Erweiterungen ohne große Änderungen:
-- Verschiedene Brett-Größen (Parameter im Konstruktor)
-- Intelligentere KI (neue Klasse, erbt von `Spieler`)
-- Grafische Oberfläche (neue View-Klasse, nutzt bestehendes `Spielbrett`)
-- Online-Multiplayer (neue Netzwerk-Spieler-Klasse)
-- Spielstand speichern/laden (Methoden in `Spiel` Klasse)
+Die KI verbessern (z. B. mit dem Minimax-Algorithmus), indem wir einfach eine neue Spieler-Unterklasse hinzufügen.
