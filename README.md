@@ -1,4 +1,3 @@
-# Vier Gewinnt
 
 # 🔴 Vier Gewinnt - Python Projekt 🟡
 
@@ -57,9 +56,9 @@ Mit q kannst du das Spiel jederzeit beenden.
 🤝 Mitwirkende
 Dieses Projekt wurde im Rahmen der Projektarbeit für SEM-AI WS 2025. erstellt.
 
-Moritz 
+-Moritz 
 
-Loveprit 
+-Lovepreet 
 
 
 Danke fürs Spielen! 🎮
