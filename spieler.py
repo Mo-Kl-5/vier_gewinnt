@@ -102,12 +102,8 @@ class ComputerSpieler(Spieler):
 
         Parameters
         ----------
-<<<<<<< HEAD
-        brett : Spielbrett
-=======
         brett : Spielbrett
             Das aktuelle Spielbrett
->>>>>>> f4084ba37824d540d0ab76fd2caa935378ca67f3
 
         Returns
         -------
