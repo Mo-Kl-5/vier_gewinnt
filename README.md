@@ -63,9 +63,3 @@ Dieses Projekt wurde im Rahmen der Projektarbeit für SEM-AI WS 2025. erstellt.
 
 Danke fürs Spielen! 🎮
 
-
-### Kurzanleitung:
-1.  Öffne die Datei `README.md` in deinem Editor.
-2.  Lösche den kompletten englischen Text.
-3.  Füge den deutschen Text von oben ein.
-4.  Speichern, committen und pushen!
